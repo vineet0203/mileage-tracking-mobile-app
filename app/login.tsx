@@ -91,7 +91,7 @@ export default function LoginScreen() {
           {/* Login Form Container */}
           <View className="flex-1 px-8 pt-8 pb-10 bg-white -mt-10 rounded-t-[40px] shadow-2xl">
             <View className="mb-8">
-              <Text className="text-blue-600 text-sm font-black uppercase tracking-[4px] mb-2">
+              <Text className="text-primary text-sm font-black uppercase tracking-[4px] mb-2">
                 Mileage Tracking
               </Text>
               <Text className="text-3xl font-bold text-slate-900">
@@ -170,7 +170,7 @@ export default function LoginScreen() {
 
               {/* Forgot Password */}
               <TouchableOpacity className="self-end">
-                <Text className="text-blue-500 font-medium text-sm">
+                <Text className="text-primary font-medium text-sm">
                   Forgot password?
                 </Text>
               </TouchableOpacity>
@@ -180,7 +180,7 @@ export default function LoginScreen() {
                 onPress={handleSubmit(onSubmit)}
                 disabled={isSubmitting}
                 activeOpacity={0.8}
-                className="bg-blue-600 h-12 rounded-2xl items-center justify-center mt-2 shadow-lg shadow-blue-300"
+                className="bg-primary h-12 rounded-2xl items-center justify-center mt-2 shadow-lg shadow-primary/30"
               >
                 {isSubmitting ? (
                   <ActivityIndicator color="white" size="small" />

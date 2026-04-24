@@ -1,0 +1,69 @@
+import { SearchInput } from "@/src/components/SearchInput";
+import { TripList } from "@/src/components/TripList";
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+
+export default function TripsScreen() {
+  const mockTrips = [
+    {
+      id: "1",
+      name: "Weekly Client Meeting",
+      date: "April 22, 2026",
+      totalPrice: "8.40",
+      status: "Approved" as const,
+      actualMileage: "15.2",
+      duration: "25 mins",
+    },
+    {
+      id: "2",
+      name: "Office Supply Run",
+      date: "April 21, 2026",
+      totalPrice: "3.78",
+      status: "Pending" as const,
+      actualMileage: "8.4",
+      duration: "15 mins",
+    },
+    {
+      id: "3",
+      name: "Project Site Visit",
+      date: "April 20, 2026",
+      totalPrice: "27.00",
+      status: "Approved" as const,
+      actualMileage: "45.0",
+      duration: "1h 10m",
+    },
+    {
+      id: "4",
+      name: "Downtown Courier",
+      date: "April 19, 2026",
+      totalPrice: "12.50",
+      status: "Approved" as const,
+      actualMileage: "18.5",
+      duration: "40 mins",
+    },
+  ];
+
+  return (
+    <View className="flex-1 bg-[#f8fafc]">
+      {/* Fixed Action Bar with Search Input */}
+      <View className="px-6 py-2 flex-row gap-x-3 items-center bg-[#f8fafc]">
+        <SearchInput placeholder="Search Trips..." onSearch={(query) => console.log("Searching for:", query)} />
+
+        <TouchableOpacity className="bg-primary px-4 h-14 rounded-2xl flex-row items-center shadow-md shadow-primary/20">
+          <Ionicons name="add-circle" size={18} color="white" />
+          <Text className="text-white font-bold ml-2 text-xs">Start New</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView
+        className="flex-1 px-6 mt-1"
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="pb-32">
+          <TripList trips={mockTrips as any} />
+        </View>
+      </ScrollView>
+    </View>
+  );
+}

@@ -8,8 +8,8 @@ module.exports = {
       /* ---------------- COLORS ---------------- */
 
       colors: {
-        primary: "#002147", // Imperial Navy
-        primaryDark: "#001835",
+        primary: "#1B71E2",
+        primaryDark: "#1557ad",
         accent: "#C5A059", // Sovereign Gold
         accentDark: "#B08A44",
 
