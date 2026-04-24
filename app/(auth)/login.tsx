@@ -46,6 +46,7 @@ export default function LoginScreen() {
       { email: data.email, password: data.password },
       {
         onError: (err) => {
+          console.log(err);
           Alert.alert("Login Failed", getApiErrorMessage(err));
         },
         // onSuccess navigation is handled by _layout auth guard

@@ -1,66 +1,48 @@
 import { ScreenWrapper } from "@/src/components/common/ScreenWrapper";
 import { SearchInput } from "@/src/components/SearchInput";
 import { TripList } from "@/src/components/TripList";
+import { useTrips } from "@/src/hooks/useTrips";
+import { TripStatus } from "@/src/types/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import React, { useMemo, useState } from "react";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 
 export default function TripsScreen() {
   const router = useRouter();
-  const mockTrips = [
-    {
-      id: "452",
-      name: "Current Active Trip",
-      date: "Started Today, 9:00 AM",
-      totalPrice: "---",
-      status: "In Progress" as const,
-      actualMileage: "---",
-      duration: "Running",
-    },
-    {
-      id: "1",
-      name: "Weekly Client Meeting",
-      date: "April 22, 2026",
-      totalPrice: "8.40",
-      status: "Approved" as const,
-      actualMileage: "15.2",
-      duration: "25 mins",
-    },
-    {
-      id: "2",
-      name: "Office Supply Run",
-      date: "April 21, 2026",
-      totalPrice: "3.78",
-      status: "Pending" as const,
-      actualMileage: "8.4",
-      duration: "15 mins",
-    },
-    {
-      id: "3",
-      name: "Project Site Visit",
-      date: "April 20, 2026",
-      totalPrice: "27.00",
-      status: "Approved" as const,
-      actualMileage: "45.0",
-      duration: "1h 10m",
-    },
-    {
-      id: "4",
-      name: "Downtown Courier",
-      date: "April 19, 2026",
-      totalPrice: "12.50",
-      status: "Approved" as const,
-      actualMileage: "18.5",
-      duration: "40 mins",
-    },
-  ];
+  const [searchQuery, setSearchQuery] = useState("");
+  const { data: trips, isLoading } = useTrips();
+
+  const mapStatus = (status: TripStatus) => {
+    switch (status) {
+      case 'APPROVED': return 'Approved';
+      case 'IN_PROGRESS': return 'In Progress';
+      case 'REJECTED': return 'Rejected';
+      default: return 'Pending';
+    }
+  };
+
+  const formattedTrips = useMemo(() => {
+    if (!trips) return [];
+    
+    return trips
+      .filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()))
+      .map(t => ({
+        id: String(t.id),
+        name: t.title,
+        date: new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        totalPrice: Number(t.total_price).toFixed(2),
+        status: mapStatus(t.status) as any,
+        actualMileage: Number(t.distance).toFixed(1),
+        duration: t.end_time ? `${Math.round((new Date(t.end_time).getTime() - new Date(t.start_time).getTime()) / 60000)} mins` : 'Active'
+      }));
+  }, [trips, searchQuery]);
 
   return (
     <View className="flex-1 bg-[#f8fafc]">
       {/* Fixed Action Bar with Search Input */}
       <View className="p-4 flex-row gap-x-3 items-center bg-[#f8fafc]">
-        <SearchInput placeholder="Search Trips..." onSearch={(query) => console.log("Searching for:", query)} />
+        <SearchInput placeholder="Search Trips..." onSearch={setSearchQuery} />
 
         <TouchableOpacity
           onPress={() => router.push("/trip/new")}
@@ -72,8 +54,19 @@ export default function TripsScreen() {
       </View>
 
       <ScreenWrapper withTabBar={true} noPadding={true} scrollable={true}>
-        <View className="px-4">
-          <TripList trips={mockTrips as any} />
+        <View className="px-4 pb-10">
+          {isLoading ? (
+            <View className="py-20">
+              <ActivityIndicator size="large" color="#1B71E2" />
+            </View>
+          ) : formattedTrips.length > 0 ? (
+            <TripList trips={formattedTrips as any} />
+          ) : (
+            <View className="py-20 items-center">
+              <Ionicons name="car-outline" size={64} color="#e2e8f0" />
+              <Text className="text-slate-400 font-bold mt-4">No trips found</Text>
+            </View>
+          )}
         </View>
       </ScreenWrapper>
     </View>

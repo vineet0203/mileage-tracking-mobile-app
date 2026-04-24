@@ -1,35 +1,57 @@
 import { ScreenWrapper } from "@/src/components/common/ScreenWrapper";
 import { Header } from "@/src/components/Header";
 import { ImageUpload } from "@/src/components/ImageUpload";
+import { getApiErrorMessage } from "@/src/hooks/useAuth";
+import { useEndTripMutation, useTripDetails } from "@/src/hooks/useTrips";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function EndTripScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const { data: trip, isLoading: tripLoading } = useTripDetails(Number(id));
+  const { mutate: endTrip, isPending: isEnding } = useEndTripMutation();
+
   const [arrivalLocation, setArrivalLocation] = useState("");
   const [endImage, setEndImage] = useState<string | null>(null);
 
-  // Mock data fetching based on ID
-  const trip = {
-    id: id,
-    name: "Weekly Client Meeting",
-    description: "In-depth discussion with the design team at client office regarding Q2 project deliverables and milestones.",
-    date: "April 22, 2026",
-    startAddress: "#234, Line one, North City District",
+  const handleEndTrip = () => {
+    if (!arrivalLocation.trim()) {
+      Alert.alert("Error", "Please enter an arrival address.");
+      return;
+    }
+
+    endTrip({
+      id: Number(id),
+      payload: {
+        end_location_address: arrivalLocation.trim(),
+        end_odometer_img: endImage || undefined,
+      }
+    }, {
+      onSuccess: () => {
+        Alert.alert("Success", "Trip ended successfully!");
+        router.replace("/(tabs)/trips");
+      },
+      onError: (err) => {
+        Alert.alert("Error", getApiErrorMessage(err, "Failed to end trip."));
+      }
+    });
   };
 
-  const handleEndTrip = () => {
-    // Logic to end trip
-    router.replace("/(tabs)/trips");
-  };
+  if (tripLoading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-[#f8fafc]">
+        <ActivityIndicator size="large" color="#1B71E2" />
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-[#f8fafc]">
       <Header
-        title={`End Trip #${trip.id}`}
+        title={`End Trip #${id}`}
         leftElement={
           <TouchableOpacity
             onPress={() => router.back()}
@@ -56,7 +78,7 @@ export default function EndTripScreen() {
             <View className="flex-1">
               <View className="mb-6">
                 <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Start Location</Text>
-                <Text className="text-slate-900 font-bold text-base">{trip.startAddress}</Text>
+                <Text className="text-slate-900 font-bold text-base">{trip?.start_location_address || "Loading..."}</Text>
               </View>
               <View>
                 <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Arrival Location</Text>
@@ -82,11 +104,18 @@ export default function EndTripScreen() {
 
         <TouchableOpacity
           onPress={handleEndTrip}
+          disabled={isEnding || !arrivalLocation.trim()}
           activeOpacity={0.9}
-          className="bg-primary py-4 rounded-2xl flex-row items-center justify-center mb-24 shadow-lg shadow-primary/30"
+          className={`${isEnding || !arrivalLocation.trim() ? "bg-slate-300" : "bg-primary"} py-4 rounded-2xl flex-row items-center justify-center mb-24 shadow-lg shadow-primary/30`}
         >
-          <Ionicons name="stop-circle" size={20} color="white" />
-          <Text className="text-white font-bold ml-2 text-lg">End Trip</Text>
+          {isEnding ? (
+            <ActivityIndicator color="white" size="small" />
+          ) : (
+            <>
+              <Ionicons name="stop-circle" size={20} color="white" />
+              <Text className="text-white font-bold ml-2 text-lg">End Trip</Text>
+            </>
+          )}
         </TouchableOpacity>
       </ScreenWrapper>
     </View>

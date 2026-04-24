@@ -1,31 +1,52 @@
 import { ScreenWrapper } from "@/src/components/common/ScreenWrapper";
 import { TripList } from "@/src/components/TripList";
+import { useTrips, useTripStats } from "@/src/hooks/useTrips";
+import { TripStatus } from "@/src/types/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import React, { useMemo } from "react";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 
 export default function Home() {
-  const recentTrips = [
-    {
-      id: "1",
-      name: "Client Meeting",
-      date: "Today, 10:30 AM",
-      totalPrice: "8.40",
-      status: "Approved" as const,
-      actualMileage: "12.4",
-      duration: "25 mins",
-    },
-    {
-      id: "2",
-      name: "Office Supply Run",
-      date: "Yesterday, 2:15 PM",
-      totalPrice: "3.78",
-      status: "Pending" as const,
-      actualMileage: "8.4",
-      duration: "15 mins",
-    },
-  ];
+  const { data: trips, isLoading: tripsLoading } = useTrips({ limit: 10 });
+  const { data: stats, isLoading: statsLoading } = useTripStats();
+
+  const mapStatus = (status: TripStatus) => {
+    switch (status) {
+      case 'APPROVED': return 'Approved';
+      case 'IN_PROGRESS': return 'In Progress';
+      case 'REJECTED': return 'Rejected';
+      default: return 'Pending';
+    }
+  };
+
+  const formattedTrips = useMemo(() => {
+    return trips?.slice(0, 5).map(t => ({
+      id: String(t.id),
+      name: t.title,
+      date: new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      totalPrice: Number(t.total_price).toFixed(2),
+      status: mapStatus(t.status) as any,
+      actualMileage: Number(t.distance).toFixed(1),
+      duration: t.end_time ? `${Math.round((new Date(t.end_time).getTime() - new Date(t.start_time).getTime()) / 60000)} mins` : 'Active'
+    })) || [];
+  }, [trips]);
+
+  if (tripsLoading || statsLoading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-[#f8fafc]">
+        <ActivityIndicator size="large" color="#1B71E2" />
+      </View>
+    );
+  }
+
+  const summary = {
+    totalMileage: Number(stats?.total_mileage || 0),
+    totalIncome: Number(stats?.total_income || 0),
+    totalTrips: Number(stats?.total_trips || 0),
+    monthMileage: Number(stats?.month_distance || 0),
+    monthIncome: Number(stats?.month_income || 0),
+  };
 
   return (
     <View className="flex-1 bg-[#f8fafc]">
@@ -35,7 +56,7 @@ export default function Home() {
             <View className="flex-row justify-between items-start mb-6">
               <View>
                 <Text className="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">Total Mileage</Text>
-                <Text className="text-white text-3xl font-black">1,248.5 <Text className="text-sm font-bold opacity-60">km</Text></Text>
+                <Text className="text-white text-3xl font-black">{summary.totalMileage.toFixed(1)} <Text className="text-sm font-bold opacity-60">km</Text></Text>
               </View>
               <View className="w-12 h-12 bg-white/20 rounded-2xl items-center justify-center">
                 <Ionicons name="car" size={24} color="white" />
@@ -45,12 +66,12 @@ export default function Home() {
             <View className="flex-row gap-x-4 border-t border-white/10 pt-6">
               <View className="flex-1">
                 <Text className="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">Total Income</Text>
-                <Text className="text-white text-xl font-bold">$842.00</Text>
+                <Text className="text-white text-xl font-bold">${summary.totalIncome.toFixed(2)}</Text>
               </View>
               <View className="w-[1px] h-8 bg-white/10" />
               <View className="flex-1">
                 <Text className="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">Total Trips</Text>
-                <Text className="text-white text-xl font-bold">54</Text>
+                <Text className="text-white text-xl font-bold">{summary.totalTrips}</Text>
               </View>
             </View>
           </View>
@@ -66,8 +87,8 @@ export default function Home() {
             <View className="flex-1">
               <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">This Month</Text>
               <View className="flex-row items-baseline">
-                <Text className="text-slate-900 text-lg font-bold">342.0 km</Text>
-                <Text className="text-primary text-sm font-bold ml-3">$215.40</Text>
+                <Text className="text-slate-900 text-lg font-bold">{summary.monthMileage.toFixed(1)} km</Text>
+                <Text className="text-primary text-sm font-bold ml-3">${summary.monthIncome.toFixed(2)}</Text>
               </View>
             </View>
           </View>
@@ -103,7 +124,7 @@ export default function Home() {
               </TouchableOpacity>
             </View>
 
-            <TripList trips={recentTrips as any} />
+            <TripList trips={formattedTrips as any} />
           </View>
         </View>
       </ScreenWrapper>

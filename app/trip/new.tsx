@@ -1,24 +1,24 @@
 import { ScreenWrapper } from "@/src/components/common/ScreenWrapper";
 import { Header } from "@/src/components/Header";
 import { ImageUpload } from "@/src/components/ImageUpload";
+import { getApiErrorMessage } from "@/src/hooks/useAuth";
+import { useRoutes } from "@/src/hooks/useRoutes";
+import { useStartTripMutation } from "@/src/hooks/useTrips";
+import { TravelRoute } from "@/src/types/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
-import { Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const ROUTES = [
-  { id: "1", name: "City Center to Airport", mileage: "15.2" },
-  { id: "2", name: "Office to Supply Store", mileage: "5.4" },
-  { id: "3", name: "Warehouse to Client Site", mileage: "12.8" },
-  { id: "4", name: "North Station to Downtown", mileage: "8.1" },
-  { id: "5", name: "Business Park to Hotel", mileage: "3.5" },
-];
 
 export default function NewTripScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [selectedRoute, setSelectedRoute] = useState<typeof ROUTES[0] | null>(null);
+  
+  const { data: routes, isLoading: routesLoading } = useRoutes();
+  const { mutate: startTrip, isPending: isStarting } = useStartTripMutation();
+
+  const [selectedRoute, setSelectedRoute] = useState<TravelRoute | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [startLocation, setStartLocation] = useState("");
@@ -27,15 +27,30 @@ export default function NewTripScreen() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredRoutes = useMemo(() => {
-    return ROUTES.filter(route =>
+    if (!routes) return [];
+    return routes.filter(route =>
       route.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [routes, searchQuery]);
 
   const handleStartTrip = () => {
-    if (!title.trim()) return;
-    // Logic to start trip
-    router.replace("/(tabs)/trips");
+    if (!title.trim() || !selectedRoute || !startLocation.trim()) return;
+
+    startTrip({
+      title: title.trim(),
+      description: description.trim(),
+      route_id: selectedRoute.id,
+      start_location_address: startLocation.trim(),
+      start_odometer_img: image || undefined,
+    }, {
+      onSuccess: () => {
+        Alert.alert("Success", "Trip started successfully!");
+        router.replace("/(tabs)/trips");
+      },
+      onError: (err) => {
+        Alert.alert("Error", getApiErrorMessage(err, "Failed to start trip."));
+      }
+    });
   };
 
   const isFormValid = title.trim().length > 0 && selectedRoute !== null && startLocation.trim().length > 0;
@@ -101,7 +116,7 @@ export default function NewTripScreen() {
             </View>
             <View>
               <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Mileage Rate</Text>
-              <Text className="text-primary text-lg font-black">{selectedRoute.mileage} $</Text>
+              <Text className="text-primary text-lg font-black">${selectedRoute.rate} / km</Text>
             </View>
           </View>
         )}
@@ -143,12 +158,18 @@ export default function NewTripScreen() {
         {/* Start Button */}
         <TouchableOpacity
           onPress={handleStartTrip}
-          disabled={!isFormValid}
+          disabled={!isFormValid || isStarting}
           activeOpacity={0.9}
-          className={`${isFormValid ? "bg-primary" : "bg-slate-300"} py-4 rounded-2xl flex-row items-center justify-center mb-24 shadow-lg ${isFormValid ? "shadow-primary/30" : ""}`}
+          className={`${isFormValid && !isStarting ? "bg-primary" : "bg-slate-300"} py-4 rounded-2xl flex-row items-center justify-center mb-24 shadow-lg ${isFormValid ? "shadow-primary/30" : ""}`}
         >
-          <Ionicons name="play" size={20} color="white" />
-          <Text className="text-white font-bold ml-2 text-lg">Start Trip</Text>
+          {isStarting ? (
+            <ActivityIndicator color="white" size="small" />
+          ) : (
+            <>
+              <Ionicons name="play" size={20} color="white" />
+              <Text className="text-white font-bold ml-2 text-lg">Start Trip</Text>
+            </>
+          )}
         </TouchableOpacity>
       </ScreenWrapper>
 
@@ -189,28 +210,32 @@ export default function NewTripScreen() {
               />
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {filteredRoutes.map((route) => (
-                <TouchableOpacity
-                  key={route.id}
-                  onPress={() => {
-                    setSelectedRoute(route);
-                    setShowRoutesModal(false);
-                    setSearchQuery("");
-                  }}
-                  className={`p-4 mb-3 rounded-2xl border ${selectedRoute?.id === route.id ? "bg-blue-50 border-primary" : "bg-white border-slate-100"} flex-row justify-between items-center`}
-                >
-                  <View className="flex-1 mr-4">
-                    <Text className={`font-bold ${selectedRoute?.id === route.id ? "text-primary" : "text-slate-900"}`}>{route.name}</Text>
-                    <Text className="text-slate-400 text-[10px] font-bold uppercase mt-1">Frequent Route</Text>
-                  </View>
-                  <View className="items-end">
-                    <Text className="text-slate-900 font-black">{route.mileage} km</Text>
-                    <Ionicons name="chevron-forward" size={14} color="#94a3b8" className="mt-1" />
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            {routesLoading ? (
+              <ActivityIndicator color="#1B71E2" size="large" className="py-10" />
+            ) : (
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {filteredRoutes.map((route) => (
+                  <TouchableOpacity
+                    key={route.id}
+                    onPress={() => {
+                      setSelectedRoute(route);
+                      setShowRoutesModal(false);
+                      setSearchQuery("");
+                    }}
+                    className={`p-4 mb-3 rounded-2xl border ${selectedRoute?.id === route.id ? "bg-blue-50 border-primary" : "bg-white border-slate-100"} flex-row justify-between items-center`}
+                  >
+                    <View className="flex-1 mr-4">
+                      <Text className={`font-bold ${selectedRoute?.id === route.id ? "text-primary" : "text-slate-900"}`}>{route.name}</Text>
+                      <Text className="text-slate-400 text-[10px] font-bold uppercase mt-1">Frequent Route</Text>
+                    </View>
+                    <View className="items-end">
+                      <Text className="text-slate-900 font-black">${route.rate} / km</Text>
+                      <Ionicons name="chevron-forward" size={14} color="#94a3b8" className="mt-1" />
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
           </View>
         </View>
       </Modal>

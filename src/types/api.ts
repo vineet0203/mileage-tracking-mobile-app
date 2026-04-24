@@ -37,3 +37,50 @@ export interface BackendResponse<T> {
   error: string | null;
 }
 
+
+//  Travel Route shape
+export interface TravelRoute {
+  id: number;
+  name: string;
+  description: string | null;
+  rate: number;
+  organization_id: number;
+}
+
+//  Trip status enum-like strings
+export type TripStatus = 'IN_PROGRESS' | 'COMPLETED_PENDING' | 'APPROVED' | 'REJECTED';
+
+//  Trip shape
+export interface Trip {
+  id: number;
+  title: string;
+  description: string | null;
+  user_id: number;
+  employee_name?: string;
+  organization_id: number;
+  route_id: number;
+  route_name: string;
+  route_rate: number;
+  start_time: string;
+  end_time: string | null;
+  start_location_address: string;
+  end_location_address: string | null;
+  start_odometer_img: string | null;
+  end_odometer_img: string | null;
+  status: TripStatus;
+  distance: number;
+  total_price: number;
+  extracted_distance: number | null;
+  extracted_total_price: number | null;
+  created_at: string;
+}
+
+//  Trip Stats shape
+export interface TripStats {
+  total_trips: number;
+  total_mileage: string | number;
+  total_income: string | number;
+  month_distance: string | number;
+  month_income: string | number;
+}
+
