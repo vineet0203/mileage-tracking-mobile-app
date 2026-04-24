@@ -1,3 +1,4 @@
+import { uploadImage } from "@/src/api/uploads";
 import { ScreenWrapper } from "@/src/components/common/ScreenWrapper";
 import { Header } from "@/src/components/Header";
 import { ImageUpload } from "@/src/components/ImageUpload";
@@ -33,24 +34,41 @@ export default function NewTripScreen() {
     );
   }, [routes, searchQuery]);
 
-  const handleStartTrip = () => {
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleStartTrip = async () => {
     if (!title.trim() || !selectedRoute || !startLocation.trim()) return;
 
-    startTrip({
-      title: title.trim(),
-      description: description.trim(),
-      route_id: selectedRoute.id,
-      start_location_address: startLocation.trim(),
-      start_odometer_img: image || undefined,
-    }, {
-      onSuccess: () => {
-        Alert.alert("Success", "Trip started successfully!");
-        router.replace("/(tabs)/trips");
-      },
-      onError: (err) => {
-        Alert.alert("Error", getApiErrorMessage(err, "Failed to start trip."));
+    let start_odometer_img = undefined;
+    
+    try {
+      if (image) {
+        setIsUploading(true);
+        start_odometer_img = await uploadImage(image);
       }
-    });
+
+      startTrip({
+        title: title.trim(),
+        description: description.trim(),
+        route_id: selectedRoute.id,
+        start_location_address: startLocation.trim(),
+        start_odometer_img,
+      }, {
+        onSuccess: () => {
+          Alert.alert("Success", "Trip started successfully!");
+          router.replace("/(tabs)/trips");
+        },
+        onError: (err) => {
+          Alert.alert("Error", getApiErrorMessage(err, "Failed to start trip."));
+        },
+        onSettled: () => {
+          setIsUploading(false);
+        }
+      });
+    } catch (err) {
+      setIsUploading(false);
+      Alert.alert("Error", "Failed to upload image. Please try again.");
+    }
   };
 
   const isFormValid = title.trim().length > 0 && selectedRoute !== null && startLocation.trim().length > 0;
@@ -158,12 +176,15 @@ export default function NewTripScreen() {
         {/* Start Button */}
         <TouchableOpacity
           onPress={handleStartTrip}
-          disabled={!isFormValid || isStarting}
+          disabled={!isFormValid || isStarting || isUploading}
           activeOpacity={0.9}
-          className={`${isFormValid && !isStarting ? "bg-primary" : "bg-slate-300"} py-4 rounded-2xl flex-row items-center justify-center mb-24 shadow-lg ${isFormValid ? "shadow-primary/30" : ""}`}
+          className={`${isFormValid && !isStarting && !isUploading ? "bg-primary" : "bg-slate-300"} py-4 rounded-2xl flex-row items-center justify-center mb-24 shadow-lg ${isFormValid ? "shadow-primary/30" : ""}`}
         >
-          {isStarting ? (
-            <ActivityIndicator color="white" size="small" />
+          {isStarting || isUploading ? (
+            <View className="flex-row items-center">
+              <ActivityIndicator color="white" size="small" className="mr-2" />
+              <Text className="text-white font-bold">{isUploading ? "Uploading Proof..." : "Starting Trip..."}</Text>
+            </View>
           ) : (
             <>
               <Ionicons name="play" size={20} color="white" />

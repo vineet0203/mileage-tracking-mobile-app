@@ -1,3 +1,4 @@
+import { uploadImage } from "@/src/api/uploads";
 import { ScreenWrapper } from "@/src/components/common/ScreenWrapper";
 import { Header } from "@/src/components/Header";
 import { ImageUpload } from "@/src/components/ImageUpload";
@@ -17,27 +18,44 @@ export default function EndTripScreen() {
   const [arrivalLocation, setArrivalLocation] = useState("");
   const [endImage, setEndImage] = useState<string | null>(null);
 
-  const handleEndTrip = () => {
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleEndTrip = async () => {
     if (!arrivalLocation.trim()) {
       Alert.alert("Error", "Please enter an arrival address.");
       return;
     }
 
-    endTrip({
-      id: Number(id),
-      payload: {
-        end_location_address: arrivalLocation.trim(),
-        end_odometer_img: endImage || undefined,
+    let end_odometer_img = undefined;
+
+    try {
+      if (endImage) {
+        setIsUploading(true);
+        end_odometer_img = await uploadImage(endImage);
       }
-    }, {
-      onSuccess: () => {
-        Alert.alert("Success", "Trip ended successfully!");
-        router.replace("/(tabs)/trips");
-      },
-      onError: (err) => {
-        Alert.alert("Error", getApiErrorMessage(err, "Failed to end trip."));
-      }
-    });
+
+      endTrip({
+        id: Number(id),
+        payload: {
+          end_location_address: arrivalLocation.trim(),
+          end_odometer_img,
+        }
+      }, {
+        onSuccess: () => {
+          Alert.alert("Success", "Trip ended successfully!");
+          router.replace("/(tabs)/trips");
+        },
+        onError: (err) => {
+          Alert.alert("Error", getApiErrorMessage(err, "Failed to end trip."));
+        },
+        onSettled: () => {
+          setIsUploading(false);
+        }
+      });
+    } catch (err) {
+      setIsUploading(false);
+      Alert.alert("Error", "Failed to upload image. Please try again.");
+    }
   };
 
   if (tripLoading) {
@@ -104,12 +122,15 @@ export default function EndTripScreen() {
 
         <TouchableOpacity
           onPress={handleEndTrip}
-          disabled={isEnding || !arrivalLocation.trim()}
+          disabled={isEnding || isUploading || !arrivalLocation.trim()}
           activeOpacity={0.9}
-          className={`${isEnding || !arrivalLocation.trim() ? "bg-slate-300" : "bg-primary"} py-4 rounded-2xl flex-row items-center justify-center mb-24 shadow-lg shadow-primary/30`}
+          className={`${isEnding || isUploading || !arrivalLocation.trim() ? "bg-slate-300" : "bg-primary"} py-4 rounded-2xl flex-row items-center justify-center mb-24 shadow-lg shadow-primary/30`}
         >
-          {isEnding ? (
-            <ActivityIndicator color="white" size="small" />
+          {isEnding || isUploading ? (
+            <View className="flex-row items-center">
+              <ActivityIndicator color="white" size="small" className="mr-2" />
+              <Text className="text-white font-bold">{isUploading ? "Uploading Proof..." : "Ending Trip..."}</Text>
+            </View>
           ) : (
             <>
               <Ionicons name="stop-circle" size={20} color="white" />
