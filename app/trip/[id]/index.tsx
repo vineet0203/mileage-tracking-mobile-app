@@ -4,13 +4,20 @@ import { useTripDetails } from "@/src/hooks/useTrips";
 import { TripStatus } from "@/src/types/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React from "react";
-import { ActivityIndicator, Image, Text, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import { ActivityIndicator, Image, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 
 export default function TripDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  const { data: trip, isLoading } = useTripDetails(Number(id));
+  const { data: trip, isLoading, refetch } = useTripDetails(Number(id));
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
 
   if (isLoading) {
     return (
@@ -55,7 +62,15 @@ export default function TripDetailsScreen() {
         hasCurve={true}
       />
 
-      <ScreenWrapper withTabBar={false} noPadding={true} scrollable={true} className="px-4 pt-2">
+      <ScreenWrapper 
+        withTabBar={false} 
+        noPadding={true} 
+        scrollable={true} 
+        className="px-4 pt-2"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#1B71E2" />
+        }
+      >
         {/* Main Info Card */}
         <View>
           <View className="bg-white p-5 rounded-[32px] shadow-sm border border-slate-100 mb-4">

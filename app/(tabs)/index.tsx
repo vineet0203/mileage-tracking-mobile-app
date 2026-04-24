@@ -4,12 +4,19 @@ import { useTrips, useTripStats } from "@/src/hooks/useTrips";
 import { TripStatus } from "@/src/types/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useMemo } from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import React, { useMemo, useState } from "react";
+import { ActivityIndicator, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 
 export default function Home() {
-  const { data: trips, isLoading: tripsLoading } = useTrips({ limit: 10 });
-  const { data: stats, isLoading: statsLoading } = useTripStats();
+  const { data: trips, isLoading: tripsLoading, refetch: refetchTrips } = useTrips({ limit: 10 });
+  const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useTripStats();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([refetchTrips(), refetchStats()]);
+    setRefreshing(false);
+  };
 
   const mapStatus = (status: TripStatus) => {
     switch (status) {
@@ -50,7 +57,15 @@ export default function Home() {
 
   return (
     <View className="flex-1 bg-[#f8fafc]">
-      <ScreenWrapper withTabBar={true} noPadding={true} scrollable={true} className="py-2">
+      <ScreenWrapper 
+        withTabBar={true} 
+        noPadding={true} 
+        scrollable={true} 
+        className="py-2"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#1B71E2" />
+        }
+      >
         <View className="px-4">
           <View className="bg-primary p-6 rounded-[32px] shadow-lg shadow-primary/30">
             <View className="flex-row justify-between items-start mb-6">

@@ -3,20 +3,27 @@ import { EditProfileModal } from "@/src/components/profiles/EditProfileModal";
 import { ProfileContactInfo } from "@/src/components/profiles/ProfileContactInfo";
 import { ProfileHeader } from "@/src/components/profiles/ProfileHeader";
 import { ProfileMenu } from "@/src/components/profiles/ProfileMenu";
-import { getApiErrorMessage, useAuth, useUpdateProfileMutation } from "@/src/hooks/useAuth";
+import { getApiErrorMessage, useAuth, useUpdateProfileMutation, useCurrentUser } from "@/src/hooks/useAuth";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { Alert, View } from "react-native";
+import React, { useMemo, useState } from "react";
+import { Alert, RefreshControl, View } from "react-native";
 
 export default function ProfileScreen() {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
+  const { data: user, refetch, isLoading: userLoading } = useCurrentUser();
   const router = useRouter();
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const { mutate: updateProfile, isPending: isUpdating } = useUpdateProfileMutation();
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Profile state — all identity fields sourced from the authenticated user in the store.
-  // Skills are local-only (no backend column yet).
-  const [profileData, setProfileData] = useState({
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
+
+  // Profile state — derived from the authenticated user.
+  const profileData = useMemo(() => ({
     name: user?.fullname || "—",
     email: user?.email || "—",
     phone: user?.phone || "—",
@@ -28,7 +35,7 @@ export default function ProfileScreen() {
       : "—",
     skills: user?.designation?.split(",") || [],
     imageUri: null as string | null,
-  });
+  }), [user]);
 
   const handleSaveProfile = (phone: string, skills: string[]) => {
     // skills are stored in the 'designation' field as a comma-separated string
@@ -38,7 +45,6 @@ export default function ProfileScreen() {
       { phone, designation },
       {
         onSuccess: () => {
-          setProfileData(prev => ({ ...prev, phone, skills }));
           setIsEditModalVisible(false);
           Alert.alert("Success", "Profile updated successfully!");
         },
@@ -68,6 +74,9 @@ export default function ProfileScreen() {
         noPadding={true}
         scrollable={true}
         className="px-4 pt-4"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#1B71E2" />
+        }
       >
         <ProfileHeader
           name={profileData.name}

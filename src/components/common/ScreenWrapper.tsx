@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, View, ViewStyle } from "react-native";
+import { RefreshControlProps, ScrollView, View, ViewStyle } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -13,6 +13,7 @@ interface ScreenWrapperProps {
   style?: ViewStyle;
   contentContainerStyle?: ViewStyle | ViewStyle[];
   showsVerticalScrollIndicator?: boolean;
+  refreshControl?: React.ReactElement<RefreshControlProps>;
 }
 
 export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
@@ -25,6 +26,7 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
   style,
   contentContainerStyle,
   showsVerticalScrollIndicator = false,
+  refreshControl,
 }) => {
   const insets = useSafeAreaInsets();
 
@@ -48,6 +50,7 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
         keyboardShouldPersistTaps="handled"
         enableOnAndroid={true}
         extraScrollHeight={20}
+        refreshControl={refreshControl}
       >
         {children}
       </KeyboardAwareScrollView>
@@ -62,6 +65,7 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
         contentContainerStyle={[containerStyle, contentContainerStyle]}
         showsVerticalScrollIndicator={showsVerticalScrollIndicator}
         keyboardShouldPersistTaps="handled"
+        refreshControl={refreshControl}
       >
         {children}
       </ScrollView>

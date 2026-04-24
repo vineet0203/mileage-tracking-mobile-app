@@ -6,12 +6,19 @@ import { TripStatus } from "@/src/types/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 
 export default function TripsScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: trips, isLoading } = useTrips();
+  const { data: trips, isLoading, refetch } = useTrips();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
 
   const mapStatus = (status: TripStatus) => {
     switch (status) {
@@ -53,7 +60,14 @@ export default function TripsScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScreenWrapper withTabBar={true} noPadding={true} scrollable={true}>
+      <ScreenWrapper 
+        withTabBar={true} 
+        noPadding={true} 
+        scrollable={true}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#1B71E2" />
+        }
+      >
         <View className="px-4 pb-10">
           {isLoading ? (
             <View className="py-20">
