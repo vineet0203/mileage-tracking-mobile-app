@@ -9,7 +9,7 @@ export default function ProfileScreen() {
 
   return (
     <View className="flex-1 bg-[#f8fafc]">
-      <ScreenWrapper withTabBar={true} className="px-6 mt-2">
+      <ScreenWrapper withTabBar={true} noPadding={true} scrollable={true} className="px-4 mt-2">
         <View className="bg-white rounded-3xl p-2 mb-8 shadow-sm border border-slate-100">
           <TouchableOpacity className="flex-row items-center p-4 border-b border-slate-50">
             <View className="w-10 h-10 bg-blue-50 rounded-xl items-center justify-center mr-4">

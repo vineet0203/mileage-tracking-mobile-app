@@ -49,13 +49,11 @@ function InitialLayout() {
   useEffect(() => {
     if (isLoading) return;
 
-    const inAuthGroup = segments[0] === "login";
+    const inAuthGroup = segments.length > 0 && segments[0] === "(auth)";
 
     if (!isAuthenticated && !inAuthGroup) {
-      // Redirect to login if not authenticated
       router.replace("/login");
     } else if (isAuthenticated && inAuthGroup) {
-      // Redirect to home if authenticated and trying to access login
       router.replace("/");
     }
   }, [isAuthenticated, segments, isLoading]);
@@ -65,10 +63,7 @@ function InitialLayout() {
       screenOptions={{
         headerShown: false,
       }}
-    >
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="login" />
-    </Stack>
+    />
   );
 }
 

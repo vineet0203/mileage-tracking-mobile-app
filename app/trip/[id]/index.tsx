@@ -41,7 +41,7 @@ export default function TripDetailsScreen() {
         hasCurve={true}
       />
 
-      <ScreenWrapper withTabBar={false}>
+      <ScreenWrapper withTabBar={false} noPadding={true} scrollable={true} className="px-4">
         {/* Main Info Card */}
         <View>
           <View className="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 mb-6">

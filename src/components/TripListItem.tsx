@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 export interface TripListItemProps {
   id: string;
@@ -33,10 +33,10 @@ export const TripListItem: React.FC<TripListItemProps> = ({
   };
 
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={handlePress}
-      activeOpacity={0.7}
-      className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm mb-4"
+      className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm mb-4 active:bg-slate-50"
+      android_ripple={{ color: "#f1f5f9" }}
     >
       <View className="flex-row justify-between items-start mb-3">
         <View className="flex-1 mr-2">
@@ -77,6 +77,6 @@ export const TripListItem: React.FC<TripListItemProps> = ({
           </View>
         </View>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 };

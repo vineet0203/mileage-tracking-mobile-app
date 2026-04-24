@@ -29,8 +29,8 @@ export default function Home() {
 
   return (
     <View className="flex-1 bg-[#f8fafc]">
-      <ScreenWrapper withTabBar={true}>
-        <View className="px-2">
+      <ScreenWrapper withTabBar={true} noPadding={true} scrollable={true} className="py-2">
+        <View className="px-4">
           <View className="bg-primary p-6 rounded-[32px] shadow-lg shadow-primary/30">
             <View className="flex-row justify-between items-start mb-6">
               <View>
@@ -57,7 +57,7 @@ export default function Home() {
         </View>
 
         {/* Content Area */}
-        <View className="px-2 mt-4">
+        <View className="px-4 mt-4">
           {/* Monthly Stats Summary Card */}
           <View className="bg-white p-5 rounded-[28px] border border-slate-100 shadow-sm flex-row items-center mb-4">
             <View className="w-12 h-12 bg-blue-50 rounded-2xl items-center justify-center mr-4">

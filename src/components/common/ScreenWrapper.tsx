@@ -5,23 +5,25 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ScreenWrapperProps {
   children: React.ReactNode;
-  contentContainerStyle?: ViewStyle | ViewStyle[];
-  style?: ViewStyle | ViewStyle[];
   scrollable?: boolean;
   keyboardAware?: boolean;
   withTabBar?: boolean;
+  noPadding?: boolean;
   className?: string;
+  style?: ViewStyle;
+  contentContainerStyle?: ViewStyle | ViewStyle[];
   showsVerticalScrollIndicator?: boolean;
 }
 
 export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
   children,
-  contentContainerStyle,
-  style,
-  scrollable = true,
+  scrollable = false,
   keyboardAware = false,
   withTabBar = false,
+  noPadding = false,
   className = "",
+  style,
+  contentContainerStyle,
   showsVerticalScrollIndicator = false,
 }) => {
   const insets = useSafeAreaInsets();
@@ -32,8 +34,8 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
 
   const containerStyle: ViewStyle = {
     paddingBottom: bottomPadding,
-    paddingHorizontal: 16,
-    paddingTop: 10,
+    paddingHorizontal: noPadding ? 0 : 8,
+    paddingTop: noPadding ? 0 : 10,
   };
 
   if (keyboardAware) {
@@ -42,7 +44,7 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
         className={`flex-1 ${className}`}
         style={style}
         contentContainerStyle={[containerStyle, contentContainerStyle]}
-        showsVerticalScrollIndicator={showsVerticalScrollIndicator}
+        // showsVerticalScrollIndicator={showsVerticalScrollIndicator}
         keyboardShouldPersistTaps="handled"
         enableOnAndroid={true}
         extraScrollHeight={20}

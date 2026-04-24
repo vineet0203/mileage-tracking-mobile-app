@@ -57,7 +57,8 @@ export default function NewTripScreen() {
 
       <ScreenWrapper
         keyboardAware={true}
-        className="pt-2"
+        noPadding={true}
+        className="pt-2 px-4"
       >
         {/* Trip Title - REQUIRED */}
         <View className="mb-5">

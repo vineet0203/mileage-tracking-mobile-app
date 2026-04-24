@@ -71,8 +71,8 @@ export default function TripsScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScreenWrapper withTabBar={true}>
-        <View>
+      <ScreenWrapper withTabBar={true} noPadding={true} scrollable={true}>
+        <View className="px-4">
           <TripList trips={mockTrips as any} />
         </View>
       </ScreenWrapper>
