@@ -2,7 +2,7 @@ import { getMe } from "@/src/api/auth";
 import { ACCESS_TOKEN_KEY } from "@/src/constants/app";
 import { useAuthStore } from "@/src/store/authStore";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack, router } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -10,13 +10,14 @@ import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
 
-// Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
-export default function RootLayout() {
-  const { setUser } = useAuthStore();
+function InitialLayout() {
+  const { isAuthenticated, isLoading, setUser } = useAuthStore();
+  const segments = useSegments();
+  const router = useRouter();
 
   useEffect(() => {
     async function prepareApp() {
@@ -45,17 +46,38 @@ export default function RootLayout() {
     prepareApp();
   }, [setUser]);
 
+  useEffect(() => {
+    if (isLoading) return;
+
+    const inAuthGroup = segments[0] === "login";
+
+    if (!isAuthenticated && !inAuthGroup) {
+      // Redirect to login if not authenticated
+      router.replace("/login");
+    } else if (isAuthenticated && inAuthGroup) {
+      // Redirect to home if authenticated and trying to access login
+      router.replace("/");
+    }
+  }, [isAuthenticated, segments, isLoading]);
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="index" />
+      <Stack.Screen name="login" />
+    </Stack>
+  );
+}
+
+export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <StatusBar style="light" />
       <SafeAreaProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="index" />
-        </Stack>
+        <InitialLayout />
       </SafeAreaProvider>
     </QueryClientProvider>
   );
