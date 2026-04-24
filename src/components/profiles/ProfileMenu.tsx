@@ -6,7 +6,7 @@ interface ProfileMenuProps {
   onHelpCenterPress: () => void;
   onPrivacyPress: () => void;
   onTermsPress: () => void;
-  onLogoutPress: () => void;
+  onLogoutPress: () => void | Promise<void>;
 }
 
 export const ProfileMenu: React.FC<ProfileMenuProps> = ({

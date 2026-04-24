@@ -1,10 +1,9 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 
 interface ProfileHeaderProps {
   name: string;
-  role: string;
   joinedDate: string;
   skills: string[];
   imageUri?: string | null;
@@ -13,7 +12,6 @@ interface ProfileHeaderProps {
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   name,
-  role,
   joinedDate,
   skills,
   imageUri,
@@ -30,7 +28,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               <Ionicons name="person" size={48} color="#1B71E2" />
             )}
           </View>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={onEditPress}
             activeOpacity={0.8}
             className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full items-center justify-center border-2 border-white shadow-sm"
@@ -43,7 +41,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <View className="flex-row items-center justify-between">
             <Text className="text-slate-900 text-2xl font-black">{name}</Text>
           </View>
-          <Text className="text-primary font-bold text-sm mb-1">{role}</Text>
           <View className="flex-row items-center">
             <Ionicons name="calendar-outline" size={12} color="#94a3b8" />
             <Text className="text-slate-400 text-xs ml-1">Joined {joinedDate}</Text>
@@ -59,7 +56,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               <Text className="text-slate-600 text-xs font-medium">{skill}</Text>
             </View>
           ))}
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={onEditPress}
             className="bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100 flex-row items-center"
           >

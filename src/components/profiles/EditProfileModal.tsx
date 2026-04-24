@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, Modal, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -9,7 +9,9 @@ interface EditProfileModalProps {
   initialPhone: string;
   initialSkills: string[];
   onSave: (phone: string, skills: string[]) => void;
+  isSaving?: boolean;
 }
+
 
 export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   isVisible,
@@ -17,11 +19,21 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   initialPhone,
   initialSkills,
   onSave,
+  isSaving = false,
 }) => {
   const insets = useSafeAreaInsets();
   const [phone, setPhone] = useState(initialPhone);
   const [skills, setSkills] = useState(initialSkills);
   const [newSkill, setNewSkill] = useState("");
+
+  // Reset local state to original data whenever the modal opens
+  useEffect(() => {
+    if (isVisible) {
+      setPhone(initialPhone);
+      setSkills(initialSkills);
+      setNewSkill("");
+    }
+  }, [isVisible, initialPhone, initialSkills]);
 
   const handleAddSkill = () => {
     if (newSkill.trim()) {
@@ -107,9 +119,14 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
           <TouchableOpacity 
             onPress={() => onSave(phone, skills)}
+            disabled={isSaving}
             className="bg-primary py-4 rounded-2xl items-center justify-center shadow-lg shadow-primary/30"
           >
-            <Text className="text-white font-black text-lg">Save Changes</Text>
+            {isSaving ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text className="text-white font-black text-lg">Save Changes</Text>
+            )}
           </TouchableOpacity>
         </KeyboardAvoidingView>
       </View>

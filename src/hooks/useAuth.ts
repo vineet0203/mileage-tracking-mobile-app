@@ -7,22 +7,20 @@ import { AxiosError } from "axios";
 import {
   forgotPassword,
   getMe,
+  login,
   logoutApi,
   resetPassword,
-  login,
+  updateProfile,
 } from "../api/auth";
 import { useAuthStore } from "../store/authStore";
+import { User } from "../types/api";
 
-// ─────────────────────────────────────────────────────────────
 //  Query Keys
-// ─────────────────────────────────────────────────────────────
 export const AUTH_KEYS = {
   me: ["auth", "me"] as const,
 } as const;
 
-// ─────────────────────────────────────────────────────────────
 //  Helper: extract a human-readable message from AxiosError
-// ─────────────────────────────────────────────────────────────
 export function getApiErrorMessage(
   error: unknown,
   fallback = "Something went wrong. Please try again.",
@@ -35,9 +33,7 @@ export function getApiErrorMessage(
   return fallback;
 }
 
-// ─────────────────────────────────────────────────────────────
 //  useCurrentUser — GET /auth/me (only runs when authenticated)
-// ─────────────────────────────────────────────────────────────
 export function useCurrentUser() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   return useQuery({
@@ -49,9 +45,7 @@ export function useCurrentUser() {
   });
 }
 
-// ─────────────────────────────────────────────────────────────
 //  useLoginMutation — POST /auth/login
-// ─────────────────────────────────────────────────────────────
 export function useLoginMutation() {
   const queryClient = useQueryClient();
   const { setUser, persistTokens } = useAuthStore();
@@ -61,24 +55,26 @@ export function useLoginMutation() {
       login(email, password),
 
     onSuccess: async (data) => {
-      // 1. Persist tokens to SecureStore + Zustand
-      await persistTokens({
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
-      });
+      try {
+        // 1. Persist tokens to SecureStore + Zustand
+        await persistTokens({
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+        });
 
-      // 2. Hydrate user state (triggers navigation guard in _layout)
-      setUser(data.user);
+        // 2. Hydrate user state (triggers navigation guard in _layout)
+        setUser(data.user);
 
-      // 3. Warm the /me cache immediately
-      queryClient.setQueryData(AUTH_KEYS.me, data.user);
+        // 3. Warm the /me cache immediately
+        queryClient.setQueryData(AUTH_KEYS.me, data.user);
+      } catch (err) {
+        console.error("[useLoginMutation] Error in onSuccess:", err);
+      }
     },
   });
 }
 
-// ─────────────────────────────────────────────────────────────
 //  useLogoutMutation — POST /auth/logout
-// ─────────────────────────────────────────────────────────────
 export function useLogoutMutation() {
   const queryClient = useQueryClient();
   const { logout } = useAuthStore();
@@ -93,18 +89,14 @@ export function useLogoutMutation() {
   });
 }
 
-// ─────────────────────────────────────────────────────────────
 //  useForgotPasswordMutation — POST /auth/forgot-password
-// ─────────────────────────────────────────────────────────────
 export function useForgotPasswordMutation() {
   return useMutation({
     mutationFn: (email: string) => forgotPassword(email),
   });
 }
 
-// ─────────────────────────────────────────────────────────────
 //  useResetPasswordMutation — POST /auth/reset-password
-// ─────────────────────────────────────────────────────────────
 export function useResetPasswordMutation() {
   return useMutation({
     mutationFn: ({
@@ -119,10 +111,29 @@ export function useResetPasswordMutation() {
   });
 }
 
-// ─────────────────────────────────────────────────────────────
 //  Convenience re-export for components that only need store state
-// ─────────────────────────────────────────────────────────────
 export function useAuth() {
   return useAuthStore();
+}
+
+//  useUpdateProfileMutation — PUT /users/:id
+export function useUpdateProfileMutation() {
+  const { user, setUser } = useAuthStore();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: Partial<Pick<User, "fullname" | "phone" | "designation">>) => {
+      if (!user?.id) throw new Error("Not authenticated");
+      return updateProfile(user.id, payload);
+    },
+    onSuccess: async () => {
+      // 1. Refetch fresh user data from server
+      const freshUser = await getMe();
+      // 2. Update store
+      setUser(freshUser);
+      // 3. Update query cache
+      queryClient.setQueryData(AUTH_KEYS.me, freshUser);
+    },
+  });
 }
 

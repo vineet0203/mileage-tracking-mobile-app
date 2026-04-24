@@ -3,24 +3,50 @@ import { useAuth } from "@/src/hooks/useAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import React from "react";
-import { Platform, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+function getInitials(name: string | null | undefined): string {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
 
 export default function TabLayout() {
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
+  const initials = getInitials(user?.fullname);
 
   return (
     <Tabs
       screenOptions={{
         header: ({ options, route }) => {
           const isDashboard = route.name === "index";
-          const icon = route.name === "index" ? "grid" : route.name === "trips" ? "car" : "person";
+          const icon =
+            route.name === "index"
+              ? "grid"
+              : route.name === "trips"
+                ? "car"
+                : "person";
+
+          /** Avatar circle shown on the left of the dashboard header */
+          const avatarElement = isDashboard ? (
+            <View className="w-10 h-10 bg-white/20 rounded-full items-center justify-center mr-3 border border-white/30">
+              <Text className="text-white font-black text-sm">{initials}</Text>
+            </View>
+          ) : undefined;
+
           return (
             <Header
-              title={isDashboard ? (user?.name || "Adventurer") : (options.title || "Mileage App")}
+              title={
+                isDashboard
+                  ? user?.fullname ?? "Welcome"
+                  : options.title ?? "Mileage App"
+              }
               variant={isDashboard ? "dashboard" : "default"}
-              icon={icon}
+              icon={isDashboard ? undefined : icon}
+              leftElement={avatarElement}
               hasCurve={true}
               showNotification={true}
             />
@@ -59,8 +85,7 @@ export default function TabLayout() {
           title: "Dashboard",
           tabBarIcon: ({ color, focused }) => (
             <View
-              className={`${focused ? "bg-blue-50" : ""
-                } p-2 rounded-xl items-center justify-center`}
+              className={`${focused ? "bg-blue-50" : ""} p-2 rounded-xl items-center justify-center`}
               style={{ width: 44, height: 44 }}
             >
               <Ionicons
@@ -78,8 +103,7 @@ export default function TabLayout() {
           title: "Your Trips",
           tabBarIcon: ({ color, focused }) => (
             <View
-              className={`${focused ? "bg-blue-50" : ""
-                } p-2 rounded-xl items-center justify-center`}
+              className={`${focused ? "bg-blue-50" : ""} p-2 rounded-xl items-center justify-center`}
               style={{ width: 44, height: 44 }}
             >
               <Ionicons
@@ -97,8 +121,7 @@ export default function TabLayout() {
           title: "Profile",
           tabBarIcon: ({ color, focused }) => (
             <View
-              className={`${focused ? "bg-blue-50" : ""
-                } p-2 rounded-xl items-center justify-center`}
+              className={`${focused ? "bg-blue-50" : ""} p-2 rounded-xl items-center justify-center`}
               style={{ width: 44, height: 44 }}
             >
               <Ionicons

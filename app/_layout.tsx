@@ -39,7 +39,8 @@ function InitialLayout() {
             // apiClient interceptor will auto-refresh if accessToken is expired
             const user = await getMe();
             setUser(user);
-          } catch {
+          } catch (err) {
+            console.error("[boot] getMe failed:", err);
             // Both tokens invalid — full logout
             await logout();
           }
@@ -47,7 +48,8 @@ function InitialLayout() {
           // No tokens at all
           await logout();
         }
-      } catch {
+      } catch (err) {
+        console.error("[boot] prepareApp fatal error:", err);
         await logout();
       } finally {
         await SplashScreen.hideAsync();
@@ -55,17 +57,20 @@ function InitialLayout() {
     }
 
     prepareApp();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading) {
+      return;
+    }
 
     const inAuthGroup = segments.length > 0 && segments[0] === "(auth)";
+    const atRoot = (segments as string[]).length === 0;
 
     if (!isAuthenticated && !inAuthGroup) {
-      router.replace("/login");
-    } else if (isAuthenticated && inAuthGroup) {
+      router.replace("/(auth)/login");
+    } else if (isAuthenticated && (inAuthGroup || atRoot)) {
       router.replace("/");
     }
   }, [isAuthenticated, segments, isLoading]);

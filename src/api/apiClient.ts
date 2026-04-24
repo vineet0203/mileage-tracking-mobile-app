@@ -5,7 +5,14 @@ import { ACCESS_TOKEN_KEY, API_BASE_URL, REFRESH_TOKEN_KEY } from "../constants/
 //  Axios instance
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  headers: { "Content-Type": "application/json" },
+  headers: {
+    "Content-Type": "application/json",
+    // Prevent Android OkHttp from caching responses.
+    // Without this, GET /auth/me returns 304 (empty body) on repeat calls,
+    // Axios throws (304 is not 2xx), catch block calls logout() → login loop.
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
+  },
   timeout: 10_000,
 });
 

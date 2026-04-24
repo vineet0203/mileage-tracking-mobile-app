@@ -103,9 +103,8 @@ export default function LoginScreen() {
                 name="email"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View
-                    className={`flex-row items-center bg-slate-50 border ${
-                      errors.email ? "border-red-500" : "border-slate-200"
-                    } rounded-2xl px-4 h-14`}
+                    className={`flex-row items-center bg-slate-50 border ${errors.email ? "border-red-500" : "border-slate-200"
+                      } rounded-2xl px-4 h-14`}
                   >
                     <Ionicons
                       name="mail-outline"
@@ -140,9 +139,8 @@ export default function LoginScreen() {
                 name="password"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View
-                    className={`flex-row items-center bg-slate-50 border ${
-                      errors.password ? "border-red-500" : "border-slate-200"
-                    } rounded-2xl px-4 h-14`}
+                    className={`flex-row items-center bg-slate-50 border ${errors.password ? "border-red-500" : "border-slate-200"
+                      } rounded-2xl px-4 h-14`}
                   >
                     <Ionicons
                       name="lock-closed-outline"
