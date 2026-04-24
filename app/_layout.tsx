@@ -1,5 +1,5 @@
 import { getMe } from "@/src/api/auth";
-import { ACCESS_TOKEN_KEY } from "@/src/constants/app";
+import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "@/src/constants/app";
 import { useAuthStore } from "@/src/store/authStore";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useRouter, useSegments } from "expo-router";
@@ -12,39 +12,51 @@ import "../global.css";
 
 SplashScreen.preventAutoHideAsync();
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 5 * 60 * 1_000,
+    },
+  },
+});
 
 function InitialLayout() {
-  const { isAuthenticated, isLoading, setUser } = useAuthStore();
+  const { isAuthenticated, isLoading, setUser, logout } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
     async function prepareApp() {
       try {
-        const token = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+        const [accessToken, refreshToken] = await Promise.all([
+          SecureStore.getItemAsync(ACCESS_TOKEN_KEY),
+          SecureStore.getItemAsync(REFRESH_TOKEN_KEY),
+        ]);
 
-        if (token) {
+        if (accessToken && refreshToken) {
           try {
+            // apiClient interceptor will auto-refresh if accessToken is expired
             const user = await getMe();
             setUser(user);
-          } catch (e) {
-            console.warn("Failed to fetch user:", e);
-            setUser(null);
+          } catch {
+            // Both tokens invalid — full logout
+            await logout();
           }
         } else {
-          setUser(null);
+          // No tokens at all
+          await logout();
         }
-      } catch (e) {
-        console.warn("Error preparing app:", e);
+      } catch {
+        await logout();
       } finally {
-        // Hide splash screen after initialization
         await SplashScreen.hideAsync();
       }
     }
 
     prepareApp();
-  }, [setUser]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (isLoading) return;
@@ -77,3 +89,4 @@ export default function RootLayout() {
     </QueryClientProvider>
   );
 }
+

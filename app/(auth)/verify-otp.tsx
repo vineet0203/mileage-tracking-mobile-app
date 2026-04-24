@@ -1,32 +1,84 @@
 import { OtpInput } from "@/src/components/auth/OtpInput";
 import { ScreenWrapper } from "@/src/components/common/ScreenWrapper";
+import {
+  getApiErrorMessage,
+  useForgotPasswordMutation,
+} from "@/src/hooks/useAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
+
+const RESEND_COUNTDOWN = 30;
 
 export default function VerifyOtpScreen() {
   const router = useRouter();
-  const { email } = useLocalSearchParams();
+  const { email } = useLocalSearchParams<{ email: string }>();
   const [otp, setOtp] = useState("");
+  const [countdown, setCountdown] = useState(RESEND_COUNTDOWN);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const { mutate: resendOtp, isPending: isResending } =
+    useForgotPasswordMutation();
+
+  // Start countdown on mount
+  useEffect(() => {
+    startCountdown();
+    return () => clearInterval(timerRef.current!);
+  }, []);
+
+  function startCountdown() {
+    setCountdown(RESEND_COUNTDOWN);
+    clearInterval(timerRef.current!);
+    timerRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }
 
   const handleVerify = () => {
-    if (otp.length !== 6) return;
-    // Mock OTP verification
-    console.log("Verifying OTP:", otp, "for", email);
+    if (otp.length !== 6) {
+      Alert.alert("Invalid OTP", "Please enter the complete 6-digit code.");
+      return;
+    }
+    // OTP is validated server-side during reset-password — pass it along
     router.push({
       pathname: "/reset-password",
-      params: { email }
+      params: { email, token: otp },
+    });
+  };
+
+  const handleResend = () => {
+    if (countdown > 0 || isResending) return;
+
+    resendOtp(email, {
+      onSuccess: () => {
+        setOtp("");
+        startCountdown();
+        Alert.alert("OTP Sent", "A new code has been sent to your email.");
+      },
+      onError: (err) => {
+        Alert.alert("Error", getApiErrorMessage(err));
+      },
     });
   };
 
   return (
     <View className="flex-1 bg-white">
-      <ScreenWrapper 
-        keyboardAware={true} 
+      <ScreenWrapper
+        keyboardAware={true}
         noPadding={true}
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 48, paddingBottom: 40 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 48,
+          paddingBottom: 40,
+        }}
       >
         <TouchableOpacity
           onPress={() => router.back()}
@@ -43,7 +95,9 @@ export default function VerifyOtpScreen() {
               resizeMode="contain"
             />
           </View>
-          <Text className="text-slate-900 text-3xl font-black text-center mb-2">Verify OTP</Text>
+          <Text className="text-slate-900 text-3xl font-black text-center mb-2">
+            Verify OTP
+          </Text>
           <Text className="text-slate-400 text-center px-4">
             We have sent a 6-digit verification code to{" "}
             <Text className="text-slate-900 font-bold">{email}</Text>
@@ -53,10 +107,7 @@ export default function VerifyOtpScreen() {
         <OtpInput
           value={otp}
           setValue={setOtp}
-          onCodeFilled={(code) => {
-            setOtp(code);
-            // Optionally auto-verify
-          }}
+          onCodeFilled={(code) => setOtp(code)}
         />
 
         <TouchableOpacity
@@ -67,13 +118,23 @@ export default function VerifyOtpScreen() {
           <Text className="text-white font-bold text-lg">Verify & Proceed</Text>
         </TouchableOpacity>
 
-        <View className="flex-row justify-center mt-8">
+        {/* Resend OTP */}
+        <View className="flex-row justify-center mt-8 items-center">
           <Text className="text-slate-400">Didn't receive code? </Text>
-          <TouchableOpacity>
-            <Text className="text-primary font-bold">Resend OTP</Text>
-          </TouchableOpacity>
+          {countdown > 0 ? (
+            <Text className="text-slate-500 font-medium">
+              Resend in {countdown}s
+            </Text>
+          ) : (
+            <TouchableOpacity onPress={handleResend} disabled={isResending}>
+              <Text className="text-primary font-bold">
+                {isResending ? "Sending…" : "Resend OTP"}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScreenWrapper>
     </View>
   );
 }
+

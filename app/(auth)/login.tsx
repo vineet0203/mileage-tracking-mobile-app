@@ -1,5 +1,5 @@
 import { ScreenWrapper } from "@/src/components/common/ScreenWrapper";
-import { useAuthStore } from "@/src/store/authStore";
+import { getApiErrorMessage, useLoginMutation } from "@/src/hooks/useAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
@@ -7,11 +7,12 @@ import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { z } from "zod";
 
@@ -24,9 +25,9 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginScreen() {
   const router = useRouter();
-  const setUser = useAuthStore((state) => state.setUser);
   const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { mutate: doLogin, isPending } = useLoginMutation();
 
   const {
     control,
@@ -35,50 +36,34 @@ export default function LoginScreen() {
     watch,
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: { email: "", password: "" },
   });
 
   const currentEmail = watch("email");
 
-  const onSubmit = async (data: LoginFormValues) => {
-    setIsSubmitting(true);
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Mock successful login
-      setUser({
-        id: 1,
-        email: data.email,
-        phone: "+1234567890",
-        name: data.email.split("@")[0],
-        profile_image: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      });
-
-      router.replace("/");
-    } catch (error) {
-      console.error("Login failed:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
+  const onSubmit = (data: LoginFormValues) => {
+    doLogin(
+      { email: data.email, password: data.password },
+      {
+        onError: (err) => {
+          Alert.alert("Login Failed", getApiErrorMessage(err));
+        },
+        // onSuccess navigation is handled by _layout auth guard
+      },
+    );
   };
 
   const handleForgotPassword = () => {
     router.push({
       pathname: "/forgot-password",
-      params: { email: currentEmail }
+      params: { email: currentEmail },
     });
   };
 
   return (
     <View className="flex-1 bg-white">
-      <ScreenWrapper 
-        keyboardAware={true} 
+      <ScreenWrapper
+        keyboardAware={true}
         noPadding={true}
         className="flex-1"
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
@@ -96,10 +81,10 @@ export default function LoginScreen() {
         <View className="flex-1 px-4 pt-8 bg-white -mt-10 rounded-t-[40px] shadow-2xl">
           <View className="mb-8 items-center">
             <View className="w-24 h-24 bg-blue-50 rounded-3xl items-center justify-center mb-4 shadow-sm">
-              <Image 
-                source={require("../../assets/icons/app-icon.png")} 
-                className="w-16 h-16" 
-                resizeMode="contain" 
+              <Image
+                source={require("../../assets/icons/app-icon.png")}
+                className="w-16 h-16"
+                resizeMode="contain"
               />
             </View>
             <Text className="text-primary text-sm font-black uppercase tracking-[4px] mb-2 text-center">
@@ -118,10 +103,16 @@ export default function LoginScreen() {
                 name="email"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View
-                    className={`flex-row items-center bg-slate-50 border ${errors.email ? "border-red-500" : "border-slate-200"
-                      } rounded-2xl px-4 h-14`}
+                    className={`flex-row items-center bg-slate-50 border ${
+                      errors.email ? "border-red-500" : "border-slate-200"
+                    } rounded-2xl px-4 h-14`}
                   >
-                    <Ionicons name="mail-outline" size={20} color="#94a3b8" className="mr-3" />
+                    <Ionicons
+                      name="mail-outline"
+                      size={20}
+                      color="#94a3b8"
+                      className="mr-3"
+                    />
                     <TextInput
                       placeholder="Email Address"
                       placeholderTextColor="#94a3b8"
@@ -149,10 +140,16 @@ export default function LoginScreen() {
                 name="password"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View
-                    className={`flex-row items-center bg-slate-50 border ${errors.password ? "border-red-500" : "border-slate-200"
-                      } rounded-2xl px-4 h-14`}
+                    className={`flex-row items-center bg-slate-50 border ${
+                      errors.password ? "border-red-500" : "border-slate-200"
+                    } rounded-2xl px-4 h-14`}
                   >
-                    <Ionicons name="lock-closed-outline" size={20} color="#94a3b8" className="mr-3" />
+                    <Ionicons
+                      name="lock-closed-outline"
+                      size={20}
+                      color="#94a3b8"
+                      className="mr-3"
+                    />
                     <TextInput
                       placeholder="Password"
                       placeholderTextColor="#94a3b8"
@@ -195,11 +192,11 @@ export default function LoginScreen() {
             {/* Login Button */}
             <TouchableOpacity
               onPress={handleSubmit(onSubmit)}
-              disabled={isSubmitting}
+              disabled={isPending}
               activeOpacity={0.8}
               className="bg-primary h-12 rounded-2xl items-center justify-center mt-2 shadow-lg shadow-primary/30"
             >
-              {isSubmitting ? (
+              {isPending ? (
                 <ActivityIndicator color="white" size="small" />
               ) : (
                 <Text className="text-white text-base font-bold">Login</Text>
@@ -211,3 +208,4 @@ export default function LoginScreen() {
     </View>
   );
 }
+

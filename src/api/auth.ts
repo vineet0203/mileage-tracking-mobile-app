@@ -1,18 +1,58 @@
-import { User } from "../types/api";
+import { BackendResponse, LoginResponse, User } from "../types/api";
+import { apiClient } from "./apiClient";
 
-export const getMe = async (): Promise<User> => {
-  // Dummy implementation for now
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        id: 1,
-        email: "adventurer@example.com",
-        phone: "+1234567890",
-        name: "Adventurer",
-        profile_image: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      });
-    }, 1000);
-  });
+// ─────────────────────────────────────────────────────────────
+//  POST /auth/login
+// ─────────────────────────────────────────────────────────────
+export const login = async (
+  email: string,
+  password: string,
+): Promise<LoginResponse> => {
+  const { data } = await apiClient.post<BackendResponse<LoginResponse>>(
+    "/auth/login",
+    { email, password },
+  );
+  return data.data;
 };
+
+// ─────────────────────────────────────────────────────────────
+//  GET /auth/me  (requires valid access token)
+// ─────────────────────────────────────────────────────────────
+export const getMe = async (): Promise<User> => {
+  const { data } = await apiClient.get<BackendResponse<User>>("/auth/me");
+  return data.data;
+};
+
+// ─────────────────────────────────────────────────────────────
+//  POST /auth/forgot-password
+// ─────────────────────────────────────────────────────────────
+export const forgotPassword = async (email: string): Promise<string> => {
+  const { data } =
+    await apiClient.post<BackendResponse<null>>("/auth/forgot-password", {
+      email,
+    });
+  return data.message;
+};
+
+// ─────────────────────────────────────────────────────────────
+//  POST /auth/reset-password
+// ─────────────────────────────────────────────────────────────
+export const resetPassword = async (
+  email: string,
+  token: string,
+  newPassword: string,
+): Promise<string> => {
+  const { data } = await apiClient.post<BackendResponse<null>>(
+    "/auth/reset-password",
+    { email, token, newPassword },
+  );
+  return data.message;
+};
+
+// ─────────────────────────────────────────────────────────────
+//  POST /auth/logout  (protected)
+// ─────────────────────────────────────────────────────────────
+export const logoutApi = async (): Promise<void> => {
+  await apiClient.post("/auth/logout");
+};
+
