@@ -1,8 +1,9 @@
+import { ScreenWrapper } from "@/src/components/common/ScreenWrapper";
 import { TripList } from "@/src/components/TripList";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 export default function Home() {
   const recentTrips = [
@@ -28,12 +29,8 @@ export default function Home() {
 
   return (
     <View className="flex-1 bg-[#f8fafc]">
-      <ScrollView
-        className="flex-1"
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Modern Integrated Stats Section */}
-        <View className="px-2 pt-6">
+      <ScreenWrapper withTabBar={true}>
+        <View className="px-2">
           <View className="bg-primary p-6 rounded-[32px] shadow-lg shadow-primary/30">
             <View className="flex-row justify-between items-start mb-6">
               <View>
@@ -98,7 +95,7 @@ export default function Home() {
           </View>
 
           {/* Recent Activity using TripList */}
-          <View className="pb-24">
+          <View>
             <View className="flex-row justify-between items-center mb-4">
               <Text className="text-slate-900 text-xl font-bold">Recent</Text>
               <TouchableOpacity onPress={() => router.push("/trips")}>
@@ -109,7 +106,7 @@ export default function Home() {
             <TripList trips={recentTrips as any} />
           </View>
         </View>
-      </ScrollView>
+      </ScreenWrapper>
     </View>
   );
 }

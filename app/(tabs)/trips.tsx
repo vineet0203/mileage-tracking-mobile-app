@@ -1,9 +1,10 @@
+import { ScreenWrapper } from "@/src/components/common/ScreenWrapper";
 import { SearchInput } from "@/src/components/SearchInput";
 import { TripList } from "@/src/components/TripList";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 export default function TripsScreen() {
   const router = useRouter();
@@ -58,10 +59,10 @@ export default function TripsScreen() {
   return (
     <View className="flex-1 bg-[#f8fafc]">
       {/* Fixed Action Bar with Search Input */}
-      <View className="px-6 py-2 flex-row gap-x-3 items-center bg-[#f8fafc]">
+      <View className="p-4 flex-row gap-x-3 items-center bg-[#f8fafc]">
         <SearchInput placeholder="Search Trips..." onSearch={(query) => console.log("Searching for:", query)} />
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           onPress={() => router.push("/trip/new")}
           className="bg-primary px-4 h-14 rounded-2xl flex-row items-center shadow-md shadow-primary/20"
         >
@@ -70,14 +71,11 @@ export default function TripsScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        className="flex-1 px-6 mt-1"
-        showsVerticalScrollIndicator={false}
-      >
-        <View className="pb-32">
+      <ScreenWrapper withTabBar={true}>
+        <View>
           <TripList trips={mockTrips as any} />
         </View>
-      </ScrollView>
+      </ScreenWrapper>
     </View>
   );
 }

@@ -1,14 +1,15 @@
 import { useAuth } from "@/src/hooks/useAuth";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import { ScreenWrapper } from "@/src/components/common/ScreenWrapper";
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
 
   return (
     <View className="flex-1 bg-[#f8fafc]">
-      <ScrollView className="flex-1 px-6 mt-2">
+      <ScreenWrapper withTabBar={true} className="px-6 mt-2">
         <View className="bg-white rounded-3xl p-2 mb-8 shadow-sm border border-slate-100">
           <TouchableOpacity className="flex-row items-center p-4 border-b border-slate-50">
             <View className="w-10 h-10 bg-blue-50 rounded-xl items-center justify-center mr-4">
@@ -37,12 +38,12 @@ export default function ProfileScreen() {
 
         <TouchableOpacity
           onPress={logout}
-          className="bg-red-50 py-4 rounded-2xl flex-row items-center justify-center border border-red-100 mb-24"
+          className="bg-red-50 py-4 rounded-2xl flex-row items-center justify-center border border-red-100"
         >
           <Ionicons name="log-out-outline" size={20} color="#ef4444" />
           <Text className="text-red-600 font-bold ml-2">Log Out</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </ScreenWrapper>
     </View>
   );
 }

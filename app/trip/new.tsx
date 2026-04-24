@@ -1,9 +1,10 @@
+import { ScreenWrapper } from "@/src/components/common/ScreenWrapper";
 import { Header } from "@/src/components/Header";
 import { ImageUpload } from "@/src/components/ImageUpload";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
-import { Image, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const ROUTES = [
@@ -54,7 +55,10 @@ export default function NewTripScreen() {
         showNotification={false}
       />
 
-      <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
+      <ScreenWrapper
+        keyboardAware={true}
+        className="pt-2"
+      >
         {/* Trip Title - REQUIRED */}
         <View className="mb-5">
           <View className="flex-row items-center mb-2 ml-1">
@@ -129,10 +133,10 @@ export default function NewTripScreen() {
         </View>
 
         {/* Image Upload */}
-        <ImageUpload 
-          image={image} 
-          onImageSelect={setImage} 
-          label="Starting Odometer Proof" 
+        <ImageUpload
+          image={image}
+          onImageSelect={setImage}
+          label="Starting Odometer Proof"
         />
 
         {/* Start Button */}
@@ -145,7 +149,7 @@ export default function NewTripScreen() {
           <Ionicons name="play" size={20} color="white" />
           <Text className="text-white font-bold ml-2 text-lg">Start Trip</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </ScreenWrapper>
 
       {/* Routes Modal */}
       <Modal

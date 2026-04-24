@@ -1,9 +1,10 @@
+import { ScreenWrapper } from "@/src/components/common/ScreenWrapper";
 import { Header } from "@/src/components/Header";
 import { ImageUpload } from "@/src/components/ImageUpload";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function EndTripScreen() {
   const router = useRouter();
@@ -27,10 +28,10 @@ export default function EndTripScreen() {
 
   return (
     <View className="flex-1 bg-[#f8fafc]">
-      <Header 
+      <Header
         title={`End Trip #${trip.id}`}
         leftElement={
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => router.back()}
             className="w-10 h-10 bg-white/20 rounded-xl items-center justify-center mr-3"
           >
@@ -40,12 +41,11 @@ export default function EndTripScreen() {
         showNotification={false}
       />
 
-      <ScrollView 
-        className="flex-1 px-6 pt-6"
-        showsVerticalScrollIndicator={false}
+      <ScreenWrapper
+        keyboardAware={true}
       >
         <Text className="text-slate-900 text-lg font-bold mb-4">Finalize Your Trip</Text>
-        
+
         <View className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm mb-6">
           <View className="flex-row items-start mb-6">
             <View className="items-center mr-4">
@@ -61,7 +61,7 @@ export default function EndTripScreen() {
               <View>
                 <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Arrival Location</Text>
                 <View className="bg-slate-50 px-4 py-3 rounded-2xl border border-slate-100 mt-1">
-                  <TextInput 
+                  <TextInput
                     className="text-slate-900 font-bold text-base p-0"
                     placeholder="Enter arrival address"
                     placeholderTextColor="#94a3b8"
@@ -73,14 +73,14 @@ export default function EndTripScreen() {
             </View>
           </View>
 
-          <ImageUpload 
-            image={endImage} 
-            onImageSelect={setEndImage} 
-            label="End Odometer Proof" 
+          <ImageUpload
+            image={endImage}
+            onImageSelect={setEndImage}
+            label="End Odometer Proof"
           />
         </View>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={handleEndTrip}
           activeOpacity={0.9}
           className="bg-primary py-4 rounded-2xl flex-row items-center justify-center mb-24 shadow-lg shadow-primary/30"
@@ -88,7 +88,7 @@ export default function EndTripScreen() {
           <Ionicons name="stop-circle" size={20} color="white" />
           <Text className="text-white font-bold ml-2 text-lg">End Trip</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </ScreenWrapper>
     </View>
   );
 }

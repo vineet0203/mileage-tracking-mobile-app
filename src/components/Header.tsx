@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export interface HeaderProps {
   title: string;
@@ -28,9 +29,11 @@ export const Header: React.FC<HeaderProps> = ({
   variant = "default",
   hasCurve = true,
 }) => {
+  const insets = useSafeAreaInsets();
   return (
     <View 
-      className={`bg-primary pt-14 px-6 ${hasCurve ? "rounded-b-3xl" : ""} shadow-lg z-10`}
+      className={`bg-primary px-6 ${hasCurve ? "rounded-b-3xl" : ""} shadow-lg z-10`}
+      style={{ paddingTop: insets.top + 10 }}
     >
       <View className="flex-row justify-between items-center mb-4">
         <View className="flex-1 flex-row items-center">

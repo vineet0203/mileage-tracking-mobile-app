@@ -4,9 +4,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import React from "react";
 import { Platform, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
@@ -34,9 +36,9 @@ export default function TabLayout() {
           shadowOffset: { width: 0, height: -4 },
           shadowOpacity: 0.05,
           shadowRadius: 10,
-          height: Platform.OS === "ios" ? 90 : 70,
-          paddingBottom: Platform.OS === "ios" ? 30 : 12,
-          paddingTop: 12,
+          height: (Platform.OS === "ios" ? 70 : 60) + insets.bottom,
+          paddingBottom: insets.bottom + (Platform.OS === "ios" ? 10 : 8),
+          paddingTop: 10,
           borderTopLeftRadius: 30,
           borderTopRightRadius: 30,
           position: "absolute",
