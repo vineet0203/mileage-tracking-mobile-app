@@ -80,6 +80,7 @@ export default function Home() {
             <Text className="text-slate-900 text-xl font-bold mb-4">Quick Actions</Text>
 
             <TouchableOpacity
+              onPress={() => router.push("/trip/new")}
               activeOpacity={0.8}
               className="bg-primary py-3 rounded-2xl flex-row items-center justify-center mb-4 shadow-md shadow-primary/20"
             >

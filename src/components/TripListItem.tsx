@@ -8,7 +8,7 @@ export interface TripListItemProps {
   name: string;
   date: string;
   totalPrice: string;
-  status: "Approved" | "Pending";
+  status: "Approved" | "Pending" | "In Progress";
   actualMileage: string;
   duration?: string; // Optional if not provided
 }
@@ -24,9 +24,17 @@ export const TripListItem: React.FC<TripListItemProps> = ({
 }) => {
   const router = useRouter();
 
+  const handlePress = () => {
+    if (status === "In Progress") {
+      router.push(`/trip/${id}/end`);
+    } else {
+      router.push(`/trip/${id}`);
+    }
+  };
+
   return (
     <TouchableOpacity
-      onPress={() => router.push(`/trip/${id}`)}
+      onPress={handlePress}
       activeOpacity={0.7}
       className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm mb-4"
     >
@@ -37,10 +45,16 @@ export const TripListItem: React.FC<TripListItemProps> = ({
         </View>
         <View className="items-end">
           <View className="bg-blue-50 px-3 py-1 rounded-full mb-2">
-            <Text className="text-primary font-bold">${totalPrice}</Text>
+            <Text className="text-primary font-bold">{status === "In Progress" ? "---" : `$${totalPrice}`}</Text>
           </View>
-          <View className={`${status === "Approved" ? "bg-green-50" : "bg-orange-50"} px-2 py-0.5 rounded-md`}>
-            <Text className={`${status === "Approved" ? "text-green-600" : "text-orange-600"} text-[9px] font-bold uppercase`}>
+          <View className={`${
+            status === "Approved" ? "bg-green-50" : 
+            status === "In Progress" ? "bg-blue-50" : "bg-orange-50"
+          } px-2 py-0.5 rounded-md`}>
+            <Text className={`${
+              status === "Approved" ? "text-green-600" : 
+              status === "In Progress" ? "text-primary" : "text-orange-600"
+            } text-[9px] font-bold uppercase`}>
               {status}
             </Text>
           </View>

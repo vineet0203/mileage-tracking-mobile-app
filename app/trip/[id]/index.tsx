@@ -26,10 +26,10 @@ export default function TripDetailsScreen() {
 
   return (
     <View className="flex-1 bg-[#f8fafc]">
-      <Header
+      <Header 
         title={`Trip #${trip.id}`}
         leftElement={
-          <TouchableOpacity
+          <TouchableOpacity 
             onPress={() => router.back()}
             className="w-10 h-10 bg-white/20 rounded-xl items-center justify-center mr-3"
           >
@@ -40,7 +40,7 @@ export default function TripDetailsScreen() {
         hasCurve={true}
       />
 
-      <ScrollView
+      <ScrollView 
         className="flex-1"
         showsVerticalScrollIndicator={false}
       >

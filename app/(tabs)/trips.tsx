@@ -1,11 +1,22 @@
 import { SearchInput } from "@/src/components/SearchInput";
 import { TripList } from "@/src/components/TripList";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function TripsScreen() {
+  const router = useRouter();
   const mockTrips = [
+    {
+      id: "452",
+      name: "Current Active Trip",
+      date: "Started Today, 9:00 AM",
+      totalPrice: "---",
+      status: "In Progress" as const,
+      actualMileage: "---",
+      duration: "Running",
+    },
     {
       id: "1",
       name: "Weekly Client Meeting",
@@ -49,8 +60,11 @@ export default function TripsScreen() {
       {/* Fixed Action Bar with Search Input */}
       <View className="px-6 py-2 flex-row gap-x-3 items-center bg-[#f8fafc]">
         <SearchInput placeholder="Search Trips..." onSearch={(query) => console.log("Searching for:", query)} />
-
-        <TouchableOpacity className="bg-primary px-4 h-14 rounded-2xl flex-row items-center shadow-md shadow-primary/20">
+        
+        <TouchableOpacity 
+          onPress={() => router.push("/trip/new")}
+          className="bg-primary px-4 h-14 rounded-2xl flex-row items-center shadow-md shadow-primary/20"
+        >
           <Ionicons name="add-circle" size={18} color="white" />
           <Text className="text-white font-bold ml-2 text-xs">Start New</Text>
         </TouchableOpacity>
