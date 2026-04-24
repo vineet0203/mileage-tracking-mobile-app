@@ -105,14 +105,6 @@ export default function Home() {
               <Ionicons name="add-circle" size={22} color="white" />
               <Text className="text-white font-bold ml-2">Start New Trip</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.8}
-              className="bg-white py-3 rounded-2xl flex-row items-center justify-center border border-slate-100 shadow-sm"
-            >
-              <Ionicons name="document-text" size={20} color="#1B71E2" />
-              <Text className="text-slate-700 font-bold ml-2">Trips Report</Text>
-            </TouchableOpacity>
           </View>
 
           {/* Recent Activity using TripList */}
