@@ -14,17 +14,17 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#3b82f6"
+      "backgroundColor": "#1B71E2"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/app-icon.png",
-        "backgroundColor": "#3b82f6"
+        "backgroundColor": "#1B71E2"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "resize",
-      "package": "com.bipulmobiledev.apnacourt"
+      "package": "com.mileagetrackingmobileapp.mileagetracking"
     },
     "web": {
       "favicon": "./assets/icons/app-icon.png"
