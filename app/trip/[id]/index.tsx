@@ -2,6 +2,7 @@ import { ScreenWrapper } from "@/src/components/common/ScreenWrapper";
 import { Header } from "@/src/components/Header";
 import { useTripDetails } from "@/src/hooks/useTrips";
 import { TripStatus } from "@/src/types/api";
+import { resolveImageUrl } from "@/src/utils/image";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -127,24 +128,37 @@ export default function TripDetailsScreen() {
             </View>
           </View>
 
-          {/* System Extracted Metrics */}
-          {(trip.extracted_distance !== null || trip.extracted_total_price !== null) && (
-            <View className="bg-slate-50 p-4 rounded-3xl border border-slate-100 flex-row items-center">
-              <View className="w-8 h-8 bg-blue-100 rounded-xl items-center justify-center mr-3">
-                <Ionicons name="scan-outline" size={16} color="#1B71E2" />
+          {/* Odometer Reading Card */}
+          <View className="bg-slate-50 p-4 rounded-3xl border border-slate-100">
+            <View className="flex-row items-center mb-3">
+              <Ionicons name="speedometer-outline" size={14} color="#1B71E2" />
+              <Text className="text-slate-400 text-[9px] font-bold uppercase tracking-widest ml-2">Odometer Reading</Text>
+            </View>
+            <View className="flex-row items-center justify-between">
+              <View className="items-center flex-1">
+                <Text className="text-slate-400 text-[9px] font-black uppercase tracking-wider mb-1">Start</Text>
+                <Text className="text-slate-900 font-black text-base">{Number(trip.start_mileage ?? 0).toLocaleString()}</Text>
+                <Text className="text-slate-400 text-[9px]">km</Text>
               </View>
-              <View className="flex-1 flex-row justify-between items-center">
-                <View>
-                  <Text className="text-slate-400 text-[9px] font-bold uppercase tracking-tighter">AI Extracted Distance</Text>
-                  <Text className="text-slate-900 font-bold">{trip.extracted_distance || 0} km</Text>
-                </View>
-                <View className="items-end">
-                  <Text className="text-slate-400 text-[9px] font-bold uppercase tracking-tighter">AI Extracted Price</Text>
-                  <Text className="text-primary font-bold">${Number(trip.extracted_total_price || 0).toFixed(2)}</Text>
-                </View>
+              <View className="flex-col items-center px-3">
+                <Text className="text-slate-300 text-lg">→</Text>
+                {trip.end_mileage != null && (
+                  <Text className="text-[9px] text-slate-400 font-bold mt-1">{Number(trip.distance).toFixed(1)} km</Text>
+                )}
+              </View>
+              <View className="items-center flex-1">
+                <Text className="text-slate-400 text-[9px] font-black uppercase tracking-wider mb-1">End</Text>
+                {trip.end_mileage != null ? (
+                  <>
+                    <Text className="text-slate-900 font-black text-base">{Number(trip.end_mileage).toLocaleString()}</Text>
+                    <Text className="text-slate-400 text-[9px]">km</Text>
+                  </>
+                ) : (
+                  <Text className="text-slate-400 text-xs italic">Pending</Text>
+                )}
               </View>
             </View>
-          )}
+          </View>
         </View>
 
         {/* Trip Metadata Tiles */}
@@ -182,7 +196,7 @@ export default function TripDetailsScreen() {
               <View className="bg-white p-2 rounded-[28px] shadow-sm border border-slate-100">
                 {trip.start_odometer_img ? (
                   <Image
-                    source={{ uri: trip.start_odometer_img }}
+                    source={{ uri: resolveImageUrl(trip.start_odometer_img)! }}
                     className="w-full h-32 rounded-[20px] bg-slate-100"
                     resizeMode="cover"
                   />
@@ -200,7 +214,7 @@ export default function TripDetailsScreen() {
               <View className="bg-white p-2 rounded-[28px] shadow-sm border border-slate-100">
                 {trip.end_odometer_img ? (
                   <Image
-                    source={{ uri: trip.end_odometer_img }}
+                    source={{ uri: resolveImageUrl(trip.end_odometer_img)! }}
                     className="w-full h-32 rounded-[20px] bg-slate-100"
                     resizeMode="cover"
                   />

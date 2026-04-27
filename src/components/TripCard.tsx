@@ -77,7 +77,7 @@ export const TripCard: React.FC<TripCardProps> = ({
         <View className="flex-row gap-4">
           <View className="flex-1">
             <Image
-              source={startImage || require("@/assets/images/trip_odometer.png")}
+              source={startImage || ""}
               className="w-full h-32 rounded-2xl bg-slate-100"
               resizeMode="cover"
             />
@@ -85,7 +85,7 @@ export const TripCard: React.FC<TripCardProps> = ({
           </View>
           <View className="flex-1">
             <Image
-              source={endImage || require("@/assets/images/trip_odometer.png")}
+              source={endImage || ""}
               className="w-full h-32 rounded-2xl bg-slate-100"
               resizeMode="cover"
             />
@@ -93,7 +93,7 @@ export const TripCard: React.FC<TripCardProps> = ({
           </View>
         </View>
       </View>
-      
+
       {/* Mileage Rate Footer */}
       <View className="bg-primary/5 px-6 py-3 border-t border-primary/10">
         <Text className="text-primary text-[10px] font-bold uppercase text-center tracking-widest">

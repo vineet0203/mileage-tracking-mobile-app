@@ -68,10 +68,10 @@ export interface Trip {
   start_odometer_img: string | null;
   end_odometer_img: string | null;
   status: TripStatus;
+  start_mileage: number;
+  end_mileage: number | null;
   distance: number;
   total_price: number;
-  extracted_distance: number | null;
-  extracted_total_price: number | null;
   created_at: string;
 }
 

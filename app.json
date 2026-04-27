@@ -39,8 +39,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "bc64f2e1-2e57-4a63-9e9b-6bc4a17dd616"
+        "projectId": "935e680e-d5b0-4ffa-a02f-b0bf8617a6a9"
       }
-    }
+    },
+    "owner": "mileage-tracking-app"
   }
 }

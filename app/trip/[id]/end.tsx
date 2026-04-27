@@ -16,6 +16,7 @@ export default function EndTripScreen() {
   const { mutate: endTrip, isPending: isEnding } = useEndTripMutation();
 
   const [arrivalLocation, setArrivalLocation] = useState("");
+  const [endMileage, setEndMileage] = useState("");
   const [endImage, setEndImage] = useState<string | null>(null);
 
   const [isUploading, setIsUploading] = useState(false);
@@ -23,6 +24,15 @@ export default function EndTripScreen() {
   const handleEndTrip = async () => {
     if (!arrivalLocation.trim()) {
       Alert.alert("Error", "Please enter an arrival address.");
+      return;
+    }
+    const parsedMileage = parseFloat(endMileage);
+    if (isNaN(parsedMileage) || parsedMileage < 0) {
+      Alert.alert("Error", "Please enter a valid end mileage.");
+      return;
+    }
+    if (trip && parsedMileage < Number(trip.start_mileage)) {
+      Alert.alert("Error", `End mileage cannot be less than start mileage (${trip.start_mileage}).`);
       return;
     }
 
@@ -38,6 +48,7 @@ export default function EndTripScreen() {
         id: Number(id),
         payload: {
           end_location_address: arrivalLocation.trim(),
+          end_mileage: parsedMileage,
           end_odometer_img,
         }
       }, {
@@ -87,7 +98,8 @@ export default function EndTripScreen() {
         <Text className="text-slate-900 text-lg font-bold mb-4">Finalize Your Trip</Text>
 
         <View className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm mb-6">
-          <View className="flex-row items-start mb-6">
+          {/* Location Timeline */}
+          <View className="flex-row items-start mb-5">
             <View className="items-center mr-4">
               <View className="w-5 h-5 rounded-full border-4 border-primary bg-white z-10" />
               <View className="w-0.5 h-16 bg-slate-100 my-1" />
@@ -113,6 +125,39 @@ export default function EndTripScreen() {
             </View>
           </View>
 
+          {/* Divider */}
+          <View className="h-px bg-slate-100 mb-5" />
+
+          {/* Odometer Readings — inline start ref + end input */}
+          <View className="flex-row items-center justify-between mb-5">
+            <View className="flex-row items-center gap-2">
+              <View className="w-9 h-9 bg-blue-50 rounded-xl items-center justify-center">
+                <Ionicons name="speedometer-outline" size={18} color="#1B71E2" />
+              </View>
+              <View>
+                <Text className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">Start Reading</Text>
+                <Text className="text-slate-900 font-black text-sm">{Number(trip?.start_mileage ?? 0).toLocaleString()} <Text className="text-slate-400 text-[10px] font-normal">km</Text></Text>
+              </View>
+            </View>
+
+            <Ionicons name="arrow-forward" size={16} color="#cbd5e1" />
+
+            <View className="items-end">
+              <Text className="text-slate-400 text-[9px] font-bold uppercase tracking-widest mb-1">End Reading <Text className="text-red-500">*</Text></Text>
+              <View className="bg-slate-50 flex-row items-center px-3 py-2 rounded-xl border border-slate-200">
+                <TextInput
+                  className="text-slate-900 font-bold text-sm p-0 min-w-[72px] text-right"
+                  placeholder="e.g. 15250"
+                  placeholderTextColor="#94a3b8"
+                  keyboardType="numeric"
+                  value={endMileage}
+                  onChangeText={setEndMileage}
+                />
+                <Text className="text-slate-400 text-xs font-bold ml-1">km</Text>
+              </View>
+            </View>
+          </View>
+
           <ImageUpload
             image={endImage}
             onImageSelect={setEndImage}
@@ -122,9 +167,9 @@ export default function EndTripScreen() {
 
         <TouchableOpacity
           onPress={handleEndTrip}
-          disabled={isEnding || isUploading || !arrivalLocation.trim()}
+          disabled={isEnding || isUploading || !arrivalLocation.trim() || !endMileage.trim()}
           activeOpacity={0.9}
-          className={`${isEnding || isUploading || !arrivalLocation.trim() ? "bg-slate-300" : "bg-primary"} py-4 rounded-2xl flex-row items-center justify-center mb-24 shadow-lg shadow-primary/30`}
+          className={`${isEnding || isUploading || !arrivalLocation.trim() || !endMileage.trim() ? "bg-slate-300" : "bg-primary"} py-4 rounded-2xl flex-row items-center justify-center mb-24 shadow-lg shadow-primary/30`}
         >
           {isEnding || isUploading ? (
             <View className="flex-row items-center">

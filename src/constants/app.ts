@@ -12,4 +12,4 @@ export const REFRESH_TOKEN_KEY = "refresh_token";
 // export const API_BASE_URL = "http://10.0.2.2:5000";        // Android emulator
 // export const API_BASE_URL = "http://localhost:5000";        // iOS simulator
 // export const API_BASE_URL = "https://api.mileage.trakjobs.com"; // Production
-export const API_BASE_URL = "http://10.250.201.23:5001";      // Physical device (current LAN IP)
+export const API_BASE_URL = "http://10.250.201.23:5001"; // Production

@@ -6,11 +6,13 @@ export interface StartTripPayload {
   description?: string;
   route_id: number;
   start_location_address: string;
+  start_mileage: number;
   start_odometer_img?: string;
 }
 
 export interface EndTripPayload {
   end_location_address: string;
+  end_mileage: number;
   end_odometer_img?: string;
 }
 

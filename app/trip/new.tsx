@@ -23,6 +23,7 @@ export default function NewTripScreen() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [startLocation, setStartLocation] = useState("");
+  const [startMileage, setStartMileage] = useState("");
   const [showRoutesModal, setShowRoutesModal] = useState(false);
   const [image, setImage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,6 +39,11 @@ export default function NewTripScreen() {
 
   const handleStartTrip = async () => {
     if (!title.trim() || !selectedRoute || !startLocation.trim()) return;
+    const parsedMileage = parseFloat(startMileage);
+    if (isNaN(parsedMileage) || parsedMileage < 0) {
+      Alert.alert("Error", "Please enter a valid start mileage.");
+      return;
+    }
 
     let start_odometer_img = undefined;
     
@@ -52,6 +58,7 @@ export default function NewTripScreen() {
         description: description.trim(),
         route_id: selectedRoute.id,
         start_location_address: startLocation.trim(),
+        start_mileage: parsedMileage,
         start_odometer_img,
       }, {
         onSuccess: () => {
@@ -71,7 +78,13 @@ export default function NewTripScreen() {
     }
   };
 
-  const isFormValid = title.trim().length > 0 && selectedRoute !== null && startLocation.trim().length > 0;
+  const isFormValid =
+    title.trim().length > 0 &&
+    selectedRoute !== null &&
+    startLocation.trim().length > 0 &&
+    startMileage.trim().length > 0 &&
+    !isNaN(parseFloat(startMileage)) &&
+    parseFloat(startMileage) >= 0;
 
   return (
     <View className="flex-1 bg-[#f8fafc]">
@@ -150,6 +163,26 @@ export default function NewTripScreen() {
               value={startLocation}
               onChangeText={setStartLocation}
             />
+          </View>
+        </View>
+
+        {/* Start Mileage - REQUIRED */}
+        <View className="mb-5">
+          <View className="flex-row items-center mb-2 ml-1">
+            <Text className="text-slate-900 font-bold">Start Odometer Reading</Text>
+            <Text className="text-red-500 ml-1">*</Text>
+          </View>
+          <View className="bg-white flex-row items-center px-4 rounded-2xl border border-slate-100 shadow-sm">
+            <Ionicons name="speedometer-outline" size={18} color="#1B71E2" />
+            <TextInput
+              className="flex-1 px-3 py-2 text-slate-900 font-medium"
+              placeholder="e.g. 15200"
+              placeholderTextColor="#94a3b8"
+              keyboardType="numeric"
+              value={startMileage}
+              onChangeText={setStartMileage}
+            />
+            <Text className="text-slate-400 text-xs font-bold">km</Text>
           </View>
         </View>
 
