@@ -50,8 +50,10 @@ apiClient.interceptors.response.use(
       _retry?: boolean;
     };
 
-    // Only attempt refresh on 401 and only once per request
-    if (error.response?.status !== 401 || originalRequest._retry) {
+    const isAuthRoute = originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/refresh-token');
+
+    // Only attempt refresh on 401, only once per request, and not for auth routes
+    if (error.response?.status !== 401 || originalRequest._retry || isAuthRoute) {
       return Promise.reject(error);
     }
 
