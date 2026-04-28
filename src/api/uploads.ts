@@ -7,11 +7,11 @@ export interface UploadResponse {
 
 export const uploadImage = async (uri: string): Promise<string> => {
   const formData = new FormData();
-  
+
   // Extract file extension
   const uriParts = uri.split('.');
   const fileType = uriParts[uriParts.length - 1];
-  
+
   // @ts-ignore
   formData.append('image', {
     uri,
